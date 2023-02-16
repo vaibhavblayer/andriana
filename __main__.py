@@ -12,6 +12,7 @@ from .src.problem import problem
 from .src.database.fetch_data import fetchdata
 from .src.notes import notes
 from .src.ideas import ideas
+from .src.chatgpt import chatgpt
 #from .src.database import createDatabase
 
 
@@ -39,6 +40,9 @@ main.add_command(extracttexenv)
 main.add_command(fetchdata)
 main.add_command(notes)
 main.add_command(ideas)
+main.add_command(chatgpt)
+
+
 if __name__ == '__main__':
     main()
 
