@@ -6,7 +6,7 @@ import time
 from rich.console import Console
 console = Console(width=20)
 # Set the API key
-openai.api_key = "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"
+openai.api_key = os.environ["OPENAI_API_KEY"]
 # Use the ChatGPT model to generate text
 
 from typing import List
