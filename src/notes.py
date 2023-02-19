@@ -33,14 +33,8 @@ eqn_number_without_database = int(time.strftime("%H%M%S%d%m%Y"))
             case_sensitive=False),
         )
 @click.option(
-        '-t',
-        '--title',
-        type=click.STRING,
-        )
-@click.option(
         '-n',
-        '--equation_number',
-        type=click.INT
+        '--notes_number'
         )
 @click.option(
         '-a',
@@ -48,28 +42,29 @@ eqn_number_without_database = int(time.strftime("%H%M%S%d%m%Y"))
         is_flag=True,
         help="flag (-a turns-on) appends the equation to database"
         )
-def notes(chapter, title, equation_number, append_to_database):
+def notes(chapter, notes_number, append_to_database):
     if append_to_database:
         try:
-            equation_number = getData(chapter, 'notes')[0][0] + 1
+            notes_number = getData(chapter, 'notes')[0][0] + 1
             #print(equation_number)
         except:
-            equation_number = 1
+            notes_number = 1
             #print(1)
         insertData(chapter, 'notes')
     else:
-        equation_number = eqn_number_without_database
+        notes_number = eqn_number_without_database
 
     path_equation = os.path.join(
             path_chapter(chapter.lower(), 'notes'),
-            f'notes-{equation_number:02}'
+            f'notes-{notes_number:02}'
             )
     os.makedirs(path_equation, exist_ok=True)
-    main_tex = os.path.join(path_equation, 'main.tex')
+    main_tex = os.path.join(path_equation, 'main.txt')
     with open(main_tex, 'w') as file:
-        file.write(equation_preamble)
+        file.write("Note")
 
-    print_equation(equation_number, chapter, main_tex)
+    print_equation(notes_number, chapter, main_tex)
     bat_file(main_tex)
+    os.system(f'vim {main_tex}')
 
 

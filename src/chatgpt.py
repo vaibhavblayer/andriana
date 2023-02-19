@@ -6,7 +6,7 @@ import time
 from rich.console import Console
 console = Console(width=20)
 # Set the API key
-openai.api_key = "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"
+openai.api_key = "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"
 # Use the ChatGPT model to generate text
 
 from typing import List
@@ -42,7 +42,7 @@ def chatgpt(question, read):
     print('\n')
     for overflow in overflow_methods:
         console.rule(overflow)
-        console.print(answer.strip(), overflow=overflow)
+        console.print(answer.strip(), overflow=overflow, style="deep_pink2")
         console.print()
 
     if read:
@@ -50,14 +50,15 @@ def chatgpt(question, read):
 
 
 def get_ans_gpt(prompt):
-    model_engine = 'text-{}-003'.format("davinci")
+    model_engine = ["code-davinci-002", "text-davinci-003", "code-cushman-001", "text-curie-001"]
+    #model_engine = 'text-{}-003'.format("davinci")
     completion = openai.Completion.create(
-            engine=model_engine,
+            engine=model_engine[1],
             prompt=prompt,
-            max_tokens=1024,
+            max_tokens=2048,
             n=1,
             stop=None,
-            temperature=0.7
+            temperature=0.2
             )
     message = completion.choices[0].text
     return message
@@ -74,7 +75,7 @@ def max_len(file):
             max_len = line_len
             longest_line = line
     file.close()
-    if max_len > 150:
-        return 150
+    if max_len > 148:
+        return 148
     else:
         return max_len

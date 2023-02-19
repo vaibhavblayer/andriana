@@ -29,12 +29,20 @@ from .tex.functions_tex import create_files
         type=click.INT,
         help="DPI -> density per inch for png"
         )
-def pdftopng(inputfile, outputfile, dpi):
+@click.option(
+        '-t',
+        '--transparent',
+        is_flag=True,
+        default=False,
+        help="Use this flag for transparent png"
+        )
+def pdftopng(inputfile, outputfile, dpi, transparent):
     #os.makedirs(f'{directory}', exist_ok = True)
+
     pages = pdf2image.convert_from_path(
         "./{}".format(inputfile), 
-        dpi=dpi, 
-        transparent = True, 
+        dpi=dpi,
+        transparent = transparent,
         use_pdftocairo = True
         )
 
