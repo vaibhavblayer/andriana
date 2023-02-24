@@ -13,7 +13,9 @@ from typing import List
 from rich.console import Console, OverflowMethod
 
 
-chatgpt_output_file = int(time.strftime("%H%M%S%d%m%Y"))
+def create_output_file(ext: str)->str:
+    output_file = f'{time.strftime("%H%M%S"):06}_{time.strftime("%d%m%Y"):08}.{ext}'
+    return output_file
 
 @click.command()
 @click.option(
@@ -27,13 +29,26 @@ chatgpt_output_file = int(time.strftime("%H%M%S%d%m%Y"))
         is_flag = True,
         help="If on read the result"
         )
-def chatgpt(question, read):
+@click.option(
+        '-e',
+        '--extension',
+        default="txt",
+        help="File extension for saving output"
+        )
+def chatgpt(question, read, extension):
     question = question
     answer = get_ans_gpt(question)
     path_gpt = '/Users/vaibhavblayer/10xphysics/chatgpt'
-    main_txt = os.path.join(path_gpt, str(chatgpt_output_file)+ '.txt')
+    main_txt = os.path.join(path_gpt, create_output_file(extension))
     with open(main_txt, 'w') as file:
-        file.write(f'Q. {question}')
+        if extension == 'py':
+            file.write(f'"""\n\nQ. {question}\n\n"""')
+        elif extension == 'swift':
+            file.write(f'/*\n\nQ. {question}\n\n*/')
+        elif extension == 'tex':
+            file.write(f'\iffalse\n\nQ. {question}\n\n\\fi')
+        else:
+            file.write(f'Q. {question}')
         file.write(answer)
 
 
@@ -75,7 +90,8 @@ def max_len(file):
             max_len = line_len
             longest_line = line
     file.close()
-    if max_len > 148:
-        return 148
+    cols = os.get_terminal_size()[0]
+    if max_len > cols:
+        return cols
     else:
         return max_len

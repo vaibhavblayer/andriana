@@ -18,7 +18,7 @@ from .src.database.update_data import updateequation
 from .src.database.update_data import updateproblem
 from .src.database.update_data import updatenotes
 from .src.database.update_data import updateideas
-
+from .src.initcode import initcode
 
 
 CONTEXT_SETTINGS = dict(
@@ -32,6 +32,7 @@ CONTEXT_SETTINGS = dict(
 def main():
     pass
 
+main.add_command(initcode)
 main.add_command(updateideas)
 main.add_command(updatenotes)
 main.add_command(updateproblem)
