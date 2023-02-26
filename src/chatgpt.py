@@ -4,38 +4,135 @@ import click
 import os
 import time
 from rich.console import Console
-console = Console(width=20)
+
 # Set the API key
 openai.api_key = os.environ["OPENAI_API_KEY"]
-# Use the ChatGPT model to generate text
 
 from typing import List
 from rich.console import Console, OverflowMethod
+
+
+def create_post(question, answer, Q, A, q_color, a_color, b_color):
+    path_gpt = '/Users/vaibhavblayer/10xphysics/chatgpt_posts/temp'
+    os.makedirs(path_gpt)
+    main_tex = os.path.join(path_gpt, 'main.tex')
+    with open(main_tex, 'w') as file:
+        file.write(f'\\documentclass{{article}}\n')
+        file.write(f'\\usepackage{{v-square-equation}}\n')
+        file.write(f'\\begin{{document}}\n')
+        if b_color != 'paper':
+            file.write(f'\\pagecolor{{{b_color}}}\n')
+        file.write(f'\\ttfamily\n')
+        file.write(f'\\sloppy\n')
+        file.write(f'\\vspace*{{\\fill}}\n')
+        file.write(f'\\begin{{itemize}}\n')
+        file.write(f'\t\\item[\\textcolor{{{q_color}}}{{{Q}}}]\\textcolor{{{q_color}}}{{{question}}}\n')
+        file.write(f'\t\\item[\\textcolor{{{a_color}}}{{{A}}}]\\textcolor{{{a_color}}}{{{answer.strip()}}}\n')
+        file.write(f'\\end{{itemize}}\n')
+        file.write(f'\\vspace*{{\\fill}}\n')
+        file.write(r"\end{document}")
+    os.system(f'bat {main_tex}')
+    os.chdir(path_gpt)
+    try:
+        os.system(f'pdflatex main.tex')
+        try:
+            os.system(f'andriana pdftopng -t')
+            if b_color == 'paper':
+                try:
+                    os.system(f'andriana addbackground')
+                    try:
+                        os.system(f'cp new.png ../{create_output_file("png")}')
+                    except:
+                        print('Error')
+                except:
+                    print('Error')
+            else:
+                try:
+                    os.system(f'cp main.png ../{create_output_file("png")}')
+                except:
+                    print('Error')
+
+            try:
+                os.system(f'rm -r {path_gpt}')
+            except:
+                print('Error')
+        except:
+            print('Error')
+    except:
+        print('Error')
 
 
 def create_output_file(ext: str)->str:
     output_file = f'{time.strftime("%H%M%S"):06}_{time.strftime("%d%m%Y"):08}.{ext}'
     return output_file
 
-@click.command()
+@click.command(
+        help='Ask anything and export the result as png or any other file format'
+        )
 @click.option(
         '-q',
         '--question',
-        help="Defines any term"
+        default='What is chatGPT ?',
+        show_default=True,
+        help="Ask anything"
         )
 @click.option(
         '-r',
         '--read',
         is_flag = True,
-        help="If on read the result"
+        default=False,
+        show_default=True,
+        help="If on! Siri reads the result"
         )
 @click.option(
         '-e',
         '--extension',
         default="txt",
+        show_default=True,
         help="File extension for saving output"
         )
-def chatgpt(question, read, extension):
+@click.option(
+        '-p',
+        '--post',
+        is_flag=True,
+        default=False,
+        show_default=True,
+        help="If given [-p] then result will be rendered as png"
+        )
+@click.option(
+        '-Q',
+        '--q_symbol',
+        default="$\\Omega ~.$",
+        show_default=True,
+        help='Question symbol'
+        )
+@click.option(
+        '-q_color',
+        default='GREEN10',
+        show_default=True,
+        help='Question color'
+        )
+@click.option(
+        '-A',
+        '--a_symbol',
+        default="$\\lambda ~.$",
+        show_default=True,
+        help='Answer symbol'
+        )
+@click.option(
+        '--a_color',
+        default='WHITE01',
+        show_default=True,
+        help='Answer color'
+        )
+@click.option(
+        '-b',
+        '--bgcolor',
+        default='BLUE20',
+        show_default=True,
+        help="Background color"
+        )
+def chatgpt(question, read, extension, post, q_symbol, q_color, a_symbol, a_color, bgcolor):
     question = question
     answer = get_ans_gpt(question)
     path_gpt = '/Users/vaibhavblayer/10xphysics/chatgpt'
@@ -62,6 +159,19 @@ def chatgpt(question, read, extension):
 
     if read:
         os.system(f'say -f {main_txt}')
+
+    if post == True:
+        post_args = {
+                'question': question,
+                'answer': answer,
+                'Q': q_symbol,
+                'A': a_symbol,
+                'q_color': q_color,
+                'a_color': a_color,
+                'b_color': bgcolor
+                }
+
+        create_post(**post_args)
 
 
 def get_ans_gpt(prompt):
