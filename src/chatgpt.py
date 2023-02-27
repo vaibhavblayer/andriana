@@ -22,6 +22,7 @@ def create_post(question, answer, Q, A, q_color, a_color, b_color):
         file.write(f'\\begin{{document}}\n')
         if b_color != 'paper':
             file.write(f'\\pagecolor{{{b_color}}}\n')
+        file.write(f'\\boldmath\n')
         file.write(f'\\ttfamily\n')
         file.write(f'\\sloppy\n')
         file.write(f'\\vspace*{{\\fill}}\n')
@@ -36,19 +37,22 @@ def create_post(question, answer, Q, A, q_color, a_color, b_color):
     try:
         os.system(f'pdflatex main.tex')
         try:
-            os.system(f'andriana pdftopng -t')
+            os.system(f'andriana pdftopng -t -d 480')
             if b_color == 'paper':
                 try:
                     os.system(f'andriana addbackground')
                     try:
-                        os.system(f'cp new.png ../{create_output_file("png")}')
+                        output_file_name  = create_file_using_string(question, "png")
+                        os.system(f'cp new.png ../{output_file_name}')
                     except:
                         print('Error')
                 except:
                     print('Error')
             else:
                 try:
-                    os.system(f'cp main.png ../{create_output_file("png")}')
+                    output_file_name  = create_file_using_string(question, "png")
+                    os.system(f'cp main.png ../{output_file_name}')
+                    print(f'\n\tOutput is rendered as {output_file_name}\n')
                 except:
                     print('Error')
 
@@ -61,6 +65,13 @@ def create_post(question, answer, Q, A, q_color, a_color, b_color):
     except:
         print('Error')
 
+
+def create_file_using_string(string: str, ext: str) -> str:
+    list_string = string.strip().lower().rstrip('.?!').split()
+    connector = '_'
+    time_date = f'{time.strftime("%H%M%S"):06}_{time.strftime("%d%m%Y"):08}'
+    output_file = f'{connector.join(list_string[:])}_{time_date}.{ext}'
+    return output_file
 
 def create_output_file(ext: str)->str:
     output_file = f'{time.strftime("%H%M%S"):06}_{time.strftime("%d%m%Y"):08}.{ext}'
@@ -136,7 +147,7 @@ def chatgpt(question, read, extension, post, q_symbol, q_color, a_symbol, a_colo
     question = question
     answer = get_ans_gpt(question)
     path_gpt = '/Users/vaibhavblayer/10xphysics/chatgpt'
-    main_txt = os.path.join(path_gpt, create_output_file(extension))
+    main_txt = os.path.join(path_gpt, create_file_using_string(question, extension))
     with open(main_txt, 'w') as file:
         if extension == 'py':
             file.write(f'"""\n\nQ. {question}\n\n"""')
