@@ -12,30 +12,45 @@ from typing import List
 from rich.console import Console, OverflowMethod
 
 
-def create_post(question, answer, Q, A, q_color, a_color, b_color):
+path_gpt_temp = '/Users/vaibhavblayer/10xphysics/chatgpt_posts/temp'
+
+def create_post(question, answer, Q, A, q_color, a_color, b_color, minted_code, language, minted_style):
     path_gpt = '/Users/vaibhavblayer/10xphysics/chatgpt_posts/temp'
     os.makedirs(path_gpt)
     main_tex = os.path.join(path_gpt, 'main.tex')
     with open(main_tex, 'w') as file:
         file.write(f'\\documentclass{{article}}\n')
         file.write(f'\\usepackage{{v-square-equation}}\n')
+        if minted_code == True:
+            file.write(f'\\usemintedstyle{{{minted_style}}}\n')
         file.write(f'\\begin{{document}}\n')
         if b_color != 'paper':
             file.write(f'\\pagecolor{{{b_color}}}\n')
-        file.write(f'\\boldmath\n')
+        #file.write(f'\\boldmath\n')
         file.write(f'\\ttfamily\n')
         file.write(f'\\sloppy\n')
         file.write(f'\\vspace*{{\\fill}}\n')
         file.write(f'\\begin{{itemize}}\n')
         file.write(f'\t\\item[\\textcolor{{{q_color}}}{{{Q}}}]\\textcolor{{{q_color}}}{{{question}}}\n')
-        file.write(f'\t\\item[\\textcolor{{{a_color}}}{{{A}}}]\\textcolor{{{a_color}}}{{{answer.strip()}}}\n')
+        if minted_code == False:
+            file.write(f'\t\\item[\\textcolor{{{a_color}}}{{{A}}}]\\textcolor{{{a_color}}}{{{answer.strip()}}}\n')
+        else:
+            file.write(f'\t\\item[\\textcolor{{{a_color}}}{{{A}}}]\n')
+            file.write(f'\\begin{{minted}}[tabsize=4, breaklines, mathescape]{{{language}}}\n')
+            file.write(f'{answer}\n')
+            file.write(f'\\end{{minted}}\n')
+
         file.write(f'\\end{{itemize}}\n')
         file.write(f'\\vspace*{{\\fill}}\n')
         file.write(r"\end{document}")
     os.system(f'bat {main_tex}')
-    os.chdir(path_gpt)
+    #click.pause()
+
+def render(path_gpt_temp, question, b_color):
+    os.chdir(path_gpt_temp)
     try:
-        os.system(f'pdflatex main.tex')
+        os.system(f'pdflatex -shell-escape main.tex')
+        click.pause()
         try:
             os.system(f'andriana pdftopng -t -d 480')
             if b_color == 'paper':
@@ -57,7 +72,7 @@ def create_post(question, answer, Q, A, q_color, a_color, b_color):
                     print('Error')
 
             try:
-                os.system(f'rm -r {path_gpt}')
+                os.system(f'rm -r {path_gpt_temp}')
             except:
                 print('Error')
         except:
@@ -118,7 +133,7 @@ def create_output_file(ext: str)->str:
         help='Question symbol'
         )
 @click.option(
-        '-q_color',
+        '--q_color',
         default='GREEN10',
         show_default=True,
         help='Question color'
@@ -143,7 +158,33 @@ def create_output_file(ext: str)->str:
         show_default=True,
         help="Background color"
         )
-def chatgpt(question, read, extension, post, q_symbol, q_color, a_symbol, a_color, bgcolor):
+@click.option(
+        '-R',
+        '--rendering',
+        is_flag=True,
+        help="Flag for rendering"
+        )
+@click.option(
+        '-m',
+        '--minted_code',
+        is_flag=True,
+        help="Turn on this flag for minted_code"
+        )
+@click.option(
+        '-l',
+        '--language',
+        default='python',
+        help='Language for minted_code'
+        )
+@click.option(
+        '-M',
+        '--minted_style',
+        type=click.Choice(['algol', 'fruity', 'monokai', 'xcode']),
+        default='fruity',
+        show_default=True,
+        help='Minted style'
+        )
+def chatgpt(question, read, extension, post, q_symbol, q_color, a_symbol, a_color, bgcolor, rendering, minted_code, language, minted_style):
     question = question
     answer = get_ans_gpt(question)
     path_gpt = '/Users/vaibhavblayer/10xphysics/chatgpt'
@@ -170,7 +211,8 @@ def chatgpt(question, read, extension, post, q_symbol, q_color, a_symbol, a_colo
 
     if read:
         os.system(f'say -f {main_txt}')
-
+    
+    click.pause()
     if post == True:
         post_args = {
                 'question': question,
@@ -179,10 +221,15 @@ def chatgpt(question, read, extension, post, q_symbol, q_color, a_symbol, a_colo
                 'A': a_symbol,
                 'q_color': q_color,
                 'a_color': a_color,
-                'b_color': bgcolor
+                'b_color': bgcolor,
+                'minted_code': minted_code,
+                'language': language,
+                'minted_style': minted_style
                 }
 
         create_post(**post_args)
+        if rendering == True:
+            render(path_gpt_temp, question, bgcolor)
 
 
 def get_ans_gpt(prompt):
@@ -216,3 +263,6 @@ def max_len(file):
         return cols
     else:
         return max_len
+
+
+
