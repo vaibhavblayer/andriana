@@ -23,6 +23,9 @@ def create_post(question, answer, Q, A, q_color, a_color, b_color, minted_code, 
         file.write(f'\\usepackage{{v-square-equation}}\n')
         if minted_code == True:
             file.write(f'\\usemintedstyle{{{minted_style}}}\n')
+            main_py = os.path.join(path_gpt, 'main.py')
+            with open(main_py, 'w') as pyfile:
+                pyfile.write(answer)
         file.write(f'\\begin{{document}}\n')
         if b_color != 'paper':
             file.write(f'\\pagecolor{{{b_color}}}\n')
@@ -31,7 +34,7 @@ def create_post(question, answer, Q, A, q_color, a_color, b_color, minted_code, 
         file.write(f'\\sloppy\n')
         file.write(f'\\vspace*{{\\fill}}\n')
         file.write(f'\\begin{{itemize}}\n')
-        file.write(f'\t\\item[\\textcolor{{{q_color}}}{{{Q}}}]\\textcolor{{{q_color}}}{{{question}}}\n')
+        file.write(f'\t\\item[\\textcolor{{{q_color}}}{{{Q}}}]\\textcolor{{{q_color}}}{{{question}}}\n\n')
         if minted_code == False:
             file.write(f'\t\\item[\\textcolor{{{a_color}}}{{{A}}}]\\textcolor{{{a_color}}}{{{answer.strip()}}}\n')
         else:
@@ -52,7 +55,7 @@ def render(path_gpt_temp, question, b_color):
         os.system(f'pdflatex -shell-escape main.tex')
         click.pause()
         try:
-            os.system(f'andriana pdftopng -t -d 480')
+            os.system(f'andriana pdftopng -t -d 320')
             if b_color == 'paper':
                 try:
                     os.system(f'andriana addbackground')
@@ -214,18 +217,34 @@ def chatgpt(question, read, extension, post, q_symbol, q_color, a_symbol, a_colo
     
     click.pause()
     if post == True:
-        post_args = {
-                'question': question,
-                'answer': answer,
-                'Q': q_symbol,
-                'A': a_symbol,
-                'q_color': q_color,
-                'a_color': a_color,
-                'b_color': bgcolor,
-                'minted_code': minted_code,
-                'language': language,
-                'minted_style': minted_style
-                }
+        if bgcolor == 'paper':
+	        post_args = {
+	                'question': question,
+	                'answer': answer,
+	                'Q': q_symbol,
+	                'A': a_symbol,
+	                'q_color': 'REDD',
+	                'a_color': 'black',
+	                'b_color': bgcolor,
+	                'minted_code': minted_code,
+	                'language': language,
+	                'minted_style': 'xcode'
+	                }
+        else:
+            post_args = {
+	                'question': question,
+	                'answer': answer,
+	                'Q': q_symbol,
+	                'A': a_symbol,
+	                'q_color': q_color,
+	                'a_color': a_color,
+	                'b_color': bgcolor,
+	                'minted_code': minted_code,
+	                'language': language,
+	                'minted_style': minted_style
+	                }
+
+
 
         create_post(**post_args)
         if rendering == True:
