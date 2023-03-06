@@ -6,6 +6,15 @@ path_electrodynamics = "/Users/vaibhavblayer/10xphysics/physics/electrodynamics"
 path_modern_physics = "/Users/vaibhavblayer/10xphysics/physics/modern-physics"
 path_optics = "/Users/vaibhavblayer/10xphysics/physics/optics"
 
+
+modules = [
+        'mechanics',
+        'electrodynamics',
+        'modern-physics',
+        'optics'
+        ]
+
+
 chapters_mechanics = [
         'kinematics',
         'projectile',
@@ -47,6 +56,16 @@ post_types = [
         'notes',
         'ideas'
         ]
+
+
+problem_type = [
+        'mine',
+        'books',
+        'jee',
+        'neet',
+        'jee_advanced'
+        ]
+
 
 
 chapters = chapters_mechanics + chapters_electrodynamics + chapters_modern_physics + chapters_optics

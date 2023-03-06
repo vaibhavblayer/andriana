@@ -8,10 +8,11 @@ from .database.insert_data import insertData
 from .database.get_data import getData
 from .print_functions import print_equation
 from .print_functions import bat_file
-from .tex.equation_tex import equation_preamble
+from .tex.equation_tex import equation_vertical_preamble
+from .tex.equation_tex import equation_square_preamble
 from .tex.equation_tex import equation_head
 from .tex.equation_tex import equation_title
-
+from .choice_option import ChoiceOption
 
 eqn_number_without_database = int(time.strftime("%H%M%S%d%m%Y"))
 
@@ -21,10 +22,12 @@ eqn_number_without_database = int(time.strftime("%H%M%S%d%m%Y"))
 @click.option(
         '-c',
         '--chapter',
+        prompt="Chapters:",
         help="Chapter name",
         type=click.Choice(
             chapters,
             case_sensitive=False),
+        cls=ChoiceOption
         )
 @click.option(
         '-t',
@@ -42,7 +45,15 @@ eqn_number_without_database = int(time.strftime("%H%M%S%d%m%Y"))
         is_flag=True,
         help="flag (-a turns-on) appends the equation to database"
         )
-def equation(chapter, title, equation_number, append_to_database):
+@click.option(
+        '-f',
+        '--equation_format',
+        default='square',
+        type=click.Choice(['square', 'vertical']),
+        show_default=True,
+        help="Format for equation rendering"
+        )
+def equation(chapter, title, equation_number, append_to_database, equation_format):
     if append_to_database:
         try:
             equation_number = getData(chapter, 'equation')[0][0] + 1
@@ -58,8 +69,12 @@ def equation(chapter, title, equation_number, append_to_database):
             )
     os.makedirs(path_equation, exist_ok=True)
     main_tex = os.path.join(path_equation, 'main.tex')
-    with open(main_tex, 'w') as file:
-        file.write(equation_preamble)
+    if equation_format == 'square':
+        with open(main_tex, 'w') as file:
+            file.write(equation_vertical_preamble)
+    else:
+        with open(main_tex, 'w') as file:
+            file.write(equation_square_preamble)
 
     print_equation(equation_number, chapter, main_tex)
     bat_file(main_tex)

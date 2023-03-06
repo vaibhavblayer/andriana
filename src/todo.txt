@@ -1,0 +1,11 @@
+POST:
+	1. Equation
+	2. Problem
+	3. Derivation
+	4. 
+
+
+PDF:
+	1. Extract png
+	2. Overlay
+	3. Merge pngs into PDF
